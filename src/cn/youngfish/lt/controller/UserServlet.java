@@ -1,7 +1,10 @@
 package cn.youngfish.lt.controller;
 
 import cn.youngfish.lt.model.User;
+import cn.youngfish.lt.model.httpmodel.AjaxInfo;
 import cn.youngfish.lt.model.httpmodel.UserInfo;
+import cn.youngfish.lt.server.UserService;
+import cn.youngfish.lt.server.impl.UserServiceImpl;
 import cn.youngfish.lt.util.JDBCUtils;
 import cn.youngfish.lt.util.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -14,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * ClassName UserServlet <br>
@@ -23,8 +28,20 @@ import java.util.List;
  * @author fish
  * @version 1.0
  **/
-@WebServlet({"/user/getUserList"})
+@WebServlet({"/user/getUserList", "/user/validateCheckCode"})
 public class UserServlet extends HttpServlet {
+
+    private static UserService userService;
+
+    @Override
+    public void init() throws ServletException {
+        userService = new UserServiceImpl();
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -32,30 +49,21 @@ public class UserServlet extends HttpServlet {
 
         //判断是否是以getUserList结尾的请求，表示获得所有服务的用户（前提是当前用户是）
         if (req.getRequestURI().endsWith("user/getUserList")) {
-            List<User> userList = getUserList();
+            List<Map<String, Object>> userList = userService.getUserList();
             resp.getWriter().write(StringUtils.objectToJsonString(userList));
             return;
+        } else if (req.getRequestURI().endsWith("user/validateCheckCode")) {
+            //前端页面进行时时验证码验证
+            String checkCode = req.getParameter("checkCode");
+            String attribute = (String) req.getSession().getAttribute("CHECK_CODE_KEY");
+            if (Objects.equals(checkCode.trim().toLowerCase(), attribute.toLowerCase())) {
+                resp.getWriter().write(StringUtils.objectToJsonString(new AjaxInfo(true, "")));
+                return;
+            } else {
+                resp.getWriter().write(StringUtils.objectToJsonString(new AjaxInfo(false, "")));
+            }
+
         }
     }
 
-    private List<User> getUserList() {
-        JdbcTemplate jdbCtemplate = JDBCUtils.getJDBCtemplate();
-
-        //获得对应权限用户
-        Integer permission = 0;
-        String sql = "select * from user";
-
-        //管理员所获得到的好友列表
-        if (UserInfo.getUserPermissions() == -1) {
-            permission = 0;
-            return jdbCtemplate.query(sql, new BeanPropertyRowMapper<>(User.class));
-        }
-
-        //普通户获得到的好友列表
-        if (UserInfo.getUserPermissions() == 0) {
-            permission = -1;
-            return jdbCtemplate.query(sql, new BeanPropertyRowMapper<>(User.class));
-        }
-        return null;
-    }
 }

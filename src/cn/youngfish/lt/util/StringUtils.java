@@ -3,6 +3,9 @@ package cn.youngfish.lt.util;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * ClassName StringUtils <br>
@@ -39,6 +42,12 @@ public class StringUtils {
             }
         }
         return "";
+    }
+
+    public static void main(String[] args) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println(dateFormat.format(new Date()));
+
     }
 
 }

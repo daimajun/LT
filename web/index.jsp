@@ -1,4 +1,4 @@
-<%--
+<%@ page import="java.util.Date" %><%--
   Created by IntelliJ IDEA.
   User: fish
   Date: 2019/2/16
@@ -58,11 +58,30 @@
                     }
                 }
             });
+
+            $("#validateImg").change(function () {
+                var checkData = $("#validateImg").val();
+                $.ajax({
+                    url: "/user/validateCheckCode",
+                    type: "post",
+                    data: {checkCode: checkData},
+                    success: function (data) {
+                        var parse = JSON.parse(data);
+                        if (parse.success) {
+                            $("#cheakCodeValidate").show().text("验证码正确！");
+                        } else {
+                            $("#cheakCodeValidate").show().text("验证码输入不正确！");
+                        }
+                    }
+                });
+            });
+
         });
 
         function login() {
             var $loginForm = $("#loginForm");
             if ($loginForm.valid()) {
+                $("#submitBtn").prop('disabled', true);
                 $.ajax({
                     url: "/login",
                     type: "POST",
@@ -75,19 +94,24 @@
                             if (message != null && message.length > 0) {
                                 $("#messageContent").text(message).show();
                             }
+                            $("#submitBtn").prop('disabled', false);
+                            flushValidateImg();
                         }
                     }
                 });
             }
         }
 
+        function flushValidateImg() {
+            $("#validateImgBox").attr('src', '/validateImg?' + new Date().getTime());
+        }
 
     </script>
 
 </head>
 <body>
 <form action="" method="post" id="loginForm">
-    <div class="container" style="width: 430px;height: 330px;background-color: antiquewhite;margin: 150px auto;">
+    <div class="container" style="width: 430px;height: 350px;background-color: antiquewhite;margin: 150px auto;">
         <div class="input-group" style="margin: 10px 0;">
             <span class="input-group-addon">
                 <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
@@ -107,17 +131,29 @@
         <div style="height: 20px;">
             <label for="password" generated="true" class="error" style="display: none;color: red;">"输入有误，请重新输入！"</label>
         </div>
+
+        <div class="input-group" style="margin: 10px 0;overflow: auto;">
+            <span class="input-group-addon">
+                <img src="<%= request.getContextPath()%>/validateImg" id="validateImgBox" onclick="flushValidateImg();">
+            </span>
+            <input type="text" id="validateImg" name="CHECK_CODE_KEY" class="form-control" placeholder="请输入验证码">
+        </div>
+        <div style="height: 20px;">
+            <label for="validateImg" id="cheakCodeValidate" generated="true" class="error"
+                   style="display: none;color: red;">"验证码输入有误！"</label>
+        </div>
+
         <div class="input-group" style="margin: 10px 0;height: 30px;line-height: 30px;width: 100%">
-            <input type="checkbox" name="remberPsd" checked="checked" style="width: 15px;height: 15px;float: left;margin-top: 7px; ">
+            <input type="checkbox" name="remberPsd" checked="checked"
+                   style="width: 15px;height: 15px;float: left;margin-top: 7px;text-align: center; ">
             <span style="float: left">记住密码</span>
-            <a style="float: right;">找回密码</a>
+            <a href="#" style="float: right;">注册用户</a>
         </div>
         <div class="input-group text-center" style="margin: 10px 0;width:100%;">
-            <input type="button" class="btn btn-primary" style="width: 50%;" value="提交" onclick="login();">
+            <input type="button" class="btn btn-primary" style="width: 50%;" value="提交" onclick="login();" id="submitBtn">
         </div>
         <div style="height: 20px;" id="message">
             <label id="messageContent" class="error" style="display: none;color: red;">"输入有误，请重新输入！"</label>
-
         </div>
     </div>
 </form>

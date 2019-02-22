@@ -14,6 +14,13 @@ public class UserInfo {
 
     public static User USER_INFO;
 
+    //客服id
+    public static Integer USER_KFID = -1;
+    //聊天室id
+    public static Integer CHAT_ROOM_ID = -1;
+    //客服名称
+    public static String KF_USER_NAME = "";
+
     /**
      * 判断当前是否有用户登录 。<br>
      * Date 19:33 2019/2/19 <br>

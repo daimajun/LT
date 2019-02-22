@@ -1,11 +1,16 @@
 package cn.youngfish.lt.websocket;
 
+import cn.youngfish.lt.model.HistoryMessage;
+import cn.youngfish.lt.model.httpmodel.AjaxInfo;
+import cn.youngfish.lt.server.HistoryMessageService;
+import cn.youngfish.lt.server.impl.HistoryMessageServiceImpl;
 import net.sf.json.JSONObject;
 
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,6 +37,11 @@ public class ServiceWebSocket {
     private String userId;
     //会话标识
     private String socketId;
+    //对象信息对象
+    HistoryMessage historyMessage;
+    //保存对话信息对象
+    private HistoryMessageService historyMessageService;
+
 
     /**
      * 连接建立成功调用的方法
@@ -41,6 +51,7 @@ public class ServiceWebSocket {
      */
     @OnOpen
     public void onOpen(@PathParam("userIdAndSocketId") String userIdAndSocketId, Session session) {
+        historyMessageService = new HistoryMessageServiceImpl();
         this.session = session;
 
         String[] arr = userIdAndSocketId.split(",");
@@ -93,7 +104,17 @@ public class ServiceWebSocket {
         if (json.has("sendToUserId")) {
             to = (String) json.get("sendToUserId");
         }
-        send(msg, userId, to, socketId);
+
+        //判断对方用户是否存在，并且在指定的聊天室,存在直接发送消息，不存在保存在数据库中
+        if (isHaveChatRoom(to)) {
+            send(msg, userId, to, socketId);
+        } else {
+            historyMessage = new HistoryMessage(Integer.parseInt(userId), Integer.parseInt(to), msg, new Date(), 0);
+            AjaxInfo ajaxInfo = historyMessageService.saveHistoryMessage(historyMessage);
+            if (!ajaxInfo.getSuccess()) {
+                System.out.println("保存聊天记录失败");
+            }
+        }
     }
 
     /**
@@ -121,7 +142,7 @@ public class ServiceWebSocket {
             ServiceWebSocket con = connections.get(toUserId);
             if (con != null) {
                 if (socketId == con.socketId || con.socketId.equals(socketId)) {
-                    con.session.getBasicRemote().sendText(fromUserId + "说：" + msg);
+                    con.session.getBasicRemote().sendText(msg);
                 }
             }
         } catch (IOException e) {
@@ -140,6 +161,22 @@ public class ServiceWebSocket {
 
     public static synchronized void subOnlineCount() {
         ServiceWebSocket.onlineCount--;
+    }
+
+    /**
+     * 判断聊天对象是否存在，主要通过对方用户id和之间的聊天室唯一id 。<br>
+     * Date 19:08 2019/2/22 <br>
+     *
+     * @param toUserId 对方用户id
+     * @return true 表示存在， false 表示不存在
+     */
+    public boolean isHaveChatRoom(String toUserId) {
+        for (Map.Entry<String, ServiceWebSocket> entry : connections.entrySet()) {
+            if (entry.getKey().equals(toUserId) && entry.getValue().socketId.equals(this.socketId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

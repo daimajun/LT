@@ -2,13 +2,10 @@ package cn.youngfish.lt.filter;
 
 import cn.youngfish.lt.model.User;
 import cn.youngfish.lt.model.httpmodel.UserInfo;
-import cn.youngfish.lt.util.StringUtils;
 
 import javax.servlet.*;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
@@ -32,9 +29,6 @@ public class LoginFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
         String requestURI = httpServletRequest.getRequestURI();
-
-        //获得登录后的用户信息
-        UserInfo.USER_INFO = (User) httpServletRequest.getSession().getAttribute("USER_INFO");
 
         if (UserInfo.USER_INFO != null) {
             filterChain.doFilter(httpServletRequest, servletResponse);

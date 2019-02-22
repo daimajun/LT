@@ -131,6 +131,7 @@
         <div class="editerTopBar" style="text-align: center; width: 100%; height: 32px;border: 1px solid #ccc;">
             <span style="float:left;" id="nowUserStatus">未连接状态</span>
             <span id="sendToUser">请选择对话好友</span>
+            <span id="nowUser" style="float: right">当前用户：<%=user_info.getLoginName()%></span>
         </div>
         <div class="showContent" id="showContent" style="overflow: auto"></div>
         <div class="toolbar" id="editerToopBar"></div>
@@ -195,7 +196,7 @@
     function openLtWebSocket(userId, userName) {
         //关闭上一聊天室
         if (ltSocket != null) {
-            ltSocket.close();
+            ltSocket = null;
         }
         if (userId.length <= 0) {
             alert("选择聊天对象的id出现问题！刷新页面重试！");
@@ -205,6 +206,7 @@
             alert("选择聊天对象的name出现问题！刷新页面重试！");
             return;
         }
+        $("#sendToUser").text(userName);
         sendToUserName = userName;
         if (nowUserId > userId) {
             webSocketId = nowUserName + userName;
