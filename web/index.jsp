@@ -1,10 +1,3 @@
-<%@ page import="java.util.Date" %><%--
-  Created by IntelliJ IDEA.
-  User: fish
-  Date: 2019/2/16
-  Time: 18:53
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <html>
 <head>
@@ -88,7 +81,7 @@
                     data: $loginForm.serialize(),
                     success: function (data) {
                         if (data.success) {
-                            location.href = "/main.jsp";
+                            location.href = "/lt.jsp";
                         } else {
                             var message = data.msg;
                             if (message != null && message.length > 0) {

@@ -1,4 +1,5 @@
 <%@ page import="cn.youngfish.lt.model.User" %>
+<%@ page import="cn.youngfish.lt.model.httpmodel.UserInfo" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -14,7 +15,8 @@
     <script src="js/LT.js"></script>
     <title>登录聊天室</title>
     <%
-        User user_info = (User) request.getSession().getAttribute("USER_INFO");
+        UserInfo userInfo = (UserInfo) request.getSession().getAttribute("USER_INFO");
+        User user_info = userInfo.getUser();
         Integer permission = user_info.getPermissions();
     %>
     <script type="text/javascript">

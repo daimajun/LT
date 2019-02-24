@@ -7,7 +7,6 @@ import cn.youngfish.lt.util.JDBCUtils;
 import cn.youngfish.lt.util.StringUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 import java.util.List;
 

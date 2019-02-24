@@ -29,8 +29,9 @@ public class LoginFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
         String requestURI = httpServletRequest.getRequestURI();
+        UserInfo userInfo = (UserInfo) httpServletRequest.getSession().getAttribute("USER_INFO");
 
-        if (UserInfo.USER_INFO != null) {
+        if (userInfo != null && userInfo.getUser() != null) {
             filterChain.doFilter(httpServletRequest, servletResponse);
             return;
         } else {

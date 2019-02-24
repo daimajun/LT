@@ -42,17 +42,19 @@ public class HistoryMessageServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String sendUserId = req.getParameter("sendUserId");
         resp.setContentType("application/json;charset=utf-8");
+        UserInfo userInfo = (UserInfo) req.getSession().getAttribute("USER_INFO");
         //当前没有登录用户直接结束
-        if (UserInfo.USER_INFO == null) {
+        if (userInfo.getUser() == null) {
             return;
         }
         if (req.getRequestURI().endsWith("/findHistoryMessage")) {
             List<HistoryMessage> historyMessageList =
                     historyMessageService.findHistoryMessageBySendUserIDAndDesUserId(Integer.valueOf(sendUserId),
-                            UserInfo.USER_INFO.getId());
+                            userInfo.getUser().getId());
             resp.getWriter().write(StringUtils.objectToJsonString(historyMessageList));
         } else if (req.getRequestURI().endsWith("/getHistoryMessageNum")) {
-            List<Map<String, Object>> historyMessageNumList = historyMessageService.findHistoryMessageNumberByNowUser();
+            List<Map<String, Object>> historyMessageNumList =
+                    historyMessageService.findHistoryMessageNumberByNowUser(userInfo.getUser().getId());
             resp.getWriter().write(StringUtils.objectToJsonString(historyMessageNumList));
         }
     }

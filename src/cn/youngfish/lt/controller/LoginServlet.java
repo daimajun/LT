@@ -57,9 +57,9 @@ public class LoginServlet extends HttpServlet {
         String remberPsd = req.getParameter("remberPsd");
 
         //对验证码的验证
-        String attribute = (String) req.getSession().getAttribute(ValidateColorServlet.CHECK_CODE_KEY);
+        String checkCode = (String) req.getSession().getAttribute(ValidateColorServlet.CHECK_CODE_KEY);
         String check_code_key = req.getParameter(ValidateColorServlet.CHECK_CODE_KEY).trim();
-        if (check_code_key != null && Objects.equals(attribute.toLowerCase(), check_code_key.toLowerCase())) {
+        if (check_code_key != null && checkCode.equalsIgnoreCase(check_code_key)) {
             //验证通过移除验证码信息
             req.getSession().removeAttribute(ValidateColorServlet.CHECK_CODE_KEY);
         } else {
@@ -75,8 +75,9 @@ public class LoginServlet extends HttpServlet {
             //保存当前登录信息到session中
             User user = (User) ajaxInfo.getObj();
 
-            //将用户信息保存在session中和静态类中
-            UserInfo.USER_INFO = user;
+            UserInfo userInfo = new UserInfo(user);
+
+
             //获得客服和聊天室信息
             ChatRoom chatRoom = userService.getChatRoomByUserId(user.getId());
             //不为空，表示是用户，会得到对应客服的服务，为空表示当前登录的是管理员
@@ -85,18 +86,19 @@ public class LoginServlet extends HttpServlet {
                 User kfUser = userService.getUserById(chatRoom.getKfId());
                 if (kfUser != null) {
                     //设置聊天室id
-                    UserInfo.CHAT_ROOM_ID = chatRoom.getId();
+                    userInfo.setChatRoomId(chatRoom.getId());
                     //设置客服名称
-                    UserInfo.KF_USER_NAME = kfUser.getLoginName();
+                    userInfo.setKfUserName(kfUser.getLoginName());
                     //设置客服id
-                    UserInfo.USER_KFID = kfUser.getId();
+                    userInfo.setKfUserID(kfUser.getId());
                 }
             }
 
 
             //切换成在线状态
             userService.changeUserStatus(user.getId(), User.ON_LINE_STATUS);
-            req.getSession().setAttribute("USER_INFO", user);
+            userInfo.getUser().setStatus(User.ON_LINE_STATUS);
+            req.getSession().setAttribute("USER_INFO", userInfo);
 
             //判断是否保存密码等登录信息
             if ("on".equals(remberPsd)) {

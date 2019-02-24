@@ -108,14 +108,28 @@ public class ServiceWebSocket {
         //判断对方用户是否存在，并且在指定的聊天室,存在直接发送消息，不存在保存在数据库中
         if (isHaveChatRoom(to)) {
             send(msg, userId, to, socketId);
+            saveMessage(msg, to, 1);
         } else {
-            historyMessage = new HistoryMessage(Integer.parseInt(userId), Integer.parseInt(to), msg, new Date(), 0);
-            AjaxInfo ajaxInfo = historyMessageService.saveHistoryMessage(historyMessage);
-            if (!ajaxInfo.getSuccess()) {
-                System.out.println("保存聊天记录失败");
-            }
+            saveMessage(msg, to, 0);
         }
     }
+
+    /**
+     * 保存用户的聊天记录，分为两种已看和未看的 。<br>
+     * Date 11:30 2019/2/24 <br>
+     *
+     * @param msg    聊天消息
+     * @param to     发送目标
+     * @param isRead 是否已阅读（0 - 未读，1 - 已读）
+     */
+    private void saveMessage(String msg, String to, Integer isRead) {
+        historyMessage = new HistoryMessage(Integer.parseInt(userId), Integer.parseInt(to), msg, new Date(), isRead);
+        AjaxInfo ajaxInfo = historyMessageService.saveHistoryMessage(historyMessage);
+        if (!ajaxInfo.getSuccess()) {
+            System.out.println("保存聊天记录失败");
+        }
+    }
+
 
     /**
      * 发生错误时调用

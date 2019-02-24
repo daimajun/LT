@@ -30,7 +30,7 @@ public interface UserService {
      *
      * @return List<User> 用户List集合
      */
-    List<Map<String, Object>> getUserList();
+    List<Map<String, Object>> getUserList(User user);
 
     /**
      * 根据用户id获得用户信息 。<br>

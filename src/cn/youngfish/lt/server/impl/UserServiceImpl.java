@@ -2,7 +2,6 @@ package cn.youngfish.lt.server.impl;
 
 import cn.youngfish.lt.model.ChatRoom;
 import cn.youngfish.lt.model.User;
-import cn.youngfish.lt.model.httpmodel.UserInfo;
 import cn.youngfish.lt.server.UserService;
 import cn.youngfish.lt.util.JDBCUtils;
 import org.springframework.dao.DataAccessException;
@@ -38,13 +37,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Map<String, Object>> getUserList() {
+    public List<Map<String, Object>> getUserList(User nowUser) {
         JdbcTemplate jdbCtemplate = JDBCUtils.getJDBCtemplate();
-        String sql = "select t1.id as id,t1.loginName as loginName,t2.id as chatRoomId from user t1 INNER JOIN ( select id,userId from " +
-                "chatroom where kfId = ?) t2 on t1.id = t2.userId";
+        String sql =
+                "select t1.id as id,t1.loginName as loginName,t2.id as chatRoomId from user t1 INNER JOIN ( select id,userId from " +
+                        "chatroom where kfId = ?) t2 on t1.id = t2.userId";
+
+        if (nowUser.getPermissions() != -1) {
+            sql = "SELECT t1.id AS id, t1.loginName AS loginName, t2.id AS chatRoomId FROM USER t1 INNER JOIN ( SELECT id, kfId FROM " +
+                    "chatroom WHERE userId = ? ) t2 ON t1.id = t2.kfId";
+        }
         List<Map<String, Object>> maps = null;
         try {
-            maps = jdbCtemplate.queryForList(sql, UserInfo.USER_INFO.getId());
+            maps = jdbCtemplate.queryForList(sql, nowUser.getId());
         } catch (DataAccessException e) {
             return null;
         }

@@ -27,17 +27,17 @@ function lt(url, showStatusTag, showSendMessage) {
 
     //连接发生错误的回调方法
     ltSocket.onerror = function () {
-        showStatus('WebSocket连接发生错误');
+        showStatus('登录错误');
     }
 
     //连接成功建立的回调方法
     ltSocket.onopen = function () {
-        showStatus('WebSocket连接成功');
+        showStatus('在线');
     }
 
     //连接关闭的回调方法
     ltSocket.onclose = function () {
-        showStatus('WebSocket连接关闭');
+        showStatus('离线');
     }
 
     //接收消息回调函数

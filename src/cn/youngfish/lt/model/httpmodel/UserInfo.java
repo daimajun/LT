@@ -12,14 +12,49 @@ import cn.youngfish.lt.model.User;
  **/
 public class UserInfo {
 
-    public static User USER_INFO;
-
+    private User user;
     //客服id
-    public static Integer USER_KFID = -1;
+    private Integer kfUserID = -1;
     //聊天室id
-    public static Integer CHAT_ROOM_ID = -1;
+    private Integer chatRoomId = -1;
     //客服名称
-    public static String KF_USER_NAME = "";
+    private String kfUserName;
+
+    public UserInfo(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Integer getKfUserID() {
+        return kfUserID;
+    }
+
+    public void setKfUserID(Integer kfUserID) {
+        this.kfUserID = kfUserID;
+    }
+
+    public Integer getChatRoomId() {
+        return chatRoomId;
+    }
+
+    public void setChatRoomId(Integer chatRoomId) {
+        this.chatRoomId = chatRoomId;
+    }
+
+    public String getKfUserName() {
+        return kfUserName;
+    }
+
+    public void setKfUserName(String kfUserName) {
+        this.kfUserName = kfUserName;
+    }
 
     /**
      * 判断当前是否有用户登录 。<br>
@@ -27,8 +62,8 @@ public class UserInfo {
      *
      * @return true 表示有， false 表示不存在
      */
-    public static boolean hasUser() {
-        if (USER_INFO != null) {
+    public boolean hasUser() {
+        if (user != null) {
             return true;
         }
         return false;
@@ -40,8 +75,8 @@ public class UserInfo {
      *
      * @return -1 表示管理员，0 表示普通用户
      */
-    public static Integer getUserPermissions() {
-        return USER_INFO.getPermissions();
+    public Integer getUserPermissions() {
+        return user.getPermissions();
     }
 
 }

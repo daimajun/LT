@@ -41,5 +41,5 @@ public interface HistoryMessageService {
      *
      * @return 历史消息集合
      */
-    List<Map<String, Object>> findHistoryMessageNumberByNowUser();
+    List<Map<String, Object>> findHistoryMessageNumberByNowUser(Integer nowUserId);
 }

@@ -1,9 +1,8 @@
-<%@ page import="cn.youngfish.lt.model.User" %>
 <%@ page import="cn.youngfish.lt.model.httpmodel.UserInfo" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8" %>
 <%
     /*当前登录用户*/
-    User user = (User) request.getSession().getAttribute("USER_INFO");
+    UserInfo userInfo = (UserInfo) request.getSession().getAttribute("USER_INFO");
 %>
 <!DOCTYPE html>
 <html>
@@ -25,36 +24,33 @@
     </style>
     <script type="text/javascript">
         //当前用户权限
-        var permissions = '<%=user.getPermissions()%>';
+        var permissions = '<%=userInfo.getUserPermissions()%>';
         //当前用户
-        var nowUserName = '<%= user.getLoginName()%>';
+        var nowUserName = '<%= userInfo.getUser().getLoginName()%>';
         //当前用户的id
-        var nowUserId = '<%= user.getId()%>';
+        var nowUserId = '<%= userInfo.getUser().getId()%>';
         //客服id
-        var sendToUserId = '<%= UserInfo.USER_KFID%>';
+        var sendToUserId = '<%= userInfo.getKfUserID()%>';
         //客服名称
-        var sendToUserName = '<%= UserInfo.KF_USER_NAME%>';
+        var sendToUserName = '<%= userInfo.getKfUserName()%>';
         //聊天室id
-        var chatRoomId = '<%= UserInfo.CHAT_ROOM_ID%>';
+        var chatRoomId = '<%= userInfo.getChatRoomId()%>';
 
         var url = "ws://" + window.location.host + "/chat/";
         //wangEditer全局对象
         var editer;
+        var refreshMsgNum;
         $(function () {
+            if (refreshMsgNum != null) {
+                clearInterval(refreshMsgNum);
+            }
 
             initWangEditer();
 
-            //判断当前用户是否为客服
-            if (permissions !== '-1') {
-                openLtWebSocket(nowUserId, chatRoomId);
-                $("#sendToUserName").text(sendToUserName);
-                $("#kfName").text(sendToUserName);
-            } else {
-                getMyUser();
-                //定时刷新获得信息
-                //setInterval(1000 * 30, refreshMessageNumber);
-                refreshMessageNumber();
-            }
+            getMyUser();
+            //定时刷新获得信息
+            setTimeout(refreshMessageNumber, 500);
+            refreshMsgNum = setInterval(refreshMessageNumber, 1000 * 10);
 
         });
 
@@ -89,6 +85,7 @@
             }
 
             url += presentUserId + "," + presentChatRoomId;
+            console.log("当前链接的地址：" + url);
             //初始化websocket插件
             lt(url, 'userStatus', 'chatShowBox');
         }
@@ -106,6 +103,8 @@
             var msgNum = $("#" + userName + userId).text();
             if (msgNum) {
                 showHistoryMsg(userId);
+            }else{
+                $("#chatShowBox").html("");
             }
 
             //打开对话框做准备
@@ -145,12 +144,16 @@
             $.ajax({
                 url: '/historyMessage/getHistoryMessageNum',
                 type: 'get',
+                async: false,
+                cache: false,
                 success: function (data) {
+                    $(".content-list-icon-label>span").text("");
                     for (var i = 0; i < data.length; i++) {
                         $("#" + data[i].loginName + data[i].id).text(data[i].msgNum);
                     }
                 }
             });
+            console.log('好友列表在刷新');
         }
 
         function showHistoryMsg(sendUserId) {
@@ -159,20 +162,18 @@
                 type: 'POST',
                 data: {'sendUserId': sendUserId},
                 success: function (data) {
-                    var $chatShowBox =  $("#chatShowBox");
-                    for(var i = 0; i < data.length; i++){
+                    var $chatShowBox = $("#chatShowBox");
+                    $chatShowBox.html("");//每打开一个与用户对话的链接都会清除界面所有的显示消息
+                    for (var i = 0; i < data.length; i++) {
                         $chatShowBox.append(getReceptionMessageHtml(data[i].msg));
                     }
+                    refreshMessageNumber();
                 }
             });
         }
 
     </script>
-    <style type="text/css">
-        .content-list:hover {
-            background: #D2E6F9;
-        }
-    </style>
+
 </head>
 <body>
 <div style="height: 590px;width: 1130px;margin: 20px auto;background-color: #FFFFFF;">
@@ -182,9 +183,9 @@
                 <div class="user-info-left">
                 </div>
                 <div class="user-info-right">
-                    <div class="user-name"><%= user.getLoginName()%>
+                    <div class="user-name"><%= userInfo.getUser().getLoginName()%>
                     </div>
-                    <div class="user-status" id="userStatus">在线</div>
+                    <div class="user-status" id="userStatus">离线</div>
                 </div>
             </div>
             <div class="search-bar">
